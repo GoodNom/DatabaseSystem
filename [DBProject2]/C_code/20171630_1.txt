@@ -1,0 +1,367 @@
+drop table if exists supply;
+drop table if exists consist;
+drop table if exists vehicle;
+drop table if exists total_price;
+drop table if exists parts;
+drop table if exists assembly_plant;
+drop table if exists supply_plant;
+drop table if exists customer;
+drop table if exists dealer;
+drop table if exists model;
+drop table if exists brand;
+
+create table brand
+	(brand_name		varchar(15),
+	 primary key (brand_name)
+	);
+    
+create table model
+	(model_name		varchar(15),
+    body_style		varchar(15) not null,
+	brand_name		varchar(15),
+	primary key (model_name),
+    foreign key (brand_name) references brand (brand_name)
+		on delete cascade
+	);
+    
+create table dealer
+	(dealer_id		varchar(15),
+    dealer_name		varchar(15) not null,
+	primary key (dealer_id)
+	);
+
+create table customer
+	(customer_id		varchar(15),
+    customer_name		varchar(15) not null,
+    phone				varchar(12),
+    gender				varchar(15) check(gender in ('F','M')),
+    annual_income		numeric(11,0) check (annual_income > 50000000),
+    address				varchar(15),
+	primary key (customer_id)
+	);
+
+create table supply_plant
+	(S_ID			varchar(15),
+    supplier_name	varchar(25) not null,
+    phone			varchar(12),
+    address			varchar(15),
+	primary key (S_ID)
+	);
+
+create table assembly_plant
+	(A_ID			varchar(15),
+    phone			varchar(12),
+    address			varchar(15),
+	primary key (A_ID)
+	);
+
+create table parts
+	(component		varchar(15),
+    S_ID			varchar(15),
+    supply_date		date,
+    model_name		varchar(15),
+	primary key (component,S_ID,supply_date),
+    foreign key (S_ID) references supply_plant (S_ID)
+		on delete cascade,
+    foreign key (model_name) references model (model_name)
+		on delete cascade
+	);
+
+create table total_price
+	(model_name		varchar(15),
+    op_color		varchar(15),
+    op_engine		varchar(15),
+    op_transmission	varchar(15),
+    price			numeric(10,0) check (price>0),
+	primary key (model_name,op_color,op_engine,op_transmission),
+    foreign key (model_name) references model (model_name)
+		on delete cascade
+	);
+  
+create table vehicle
+	(VIN			varchar(17),
+    dealer_id		varchar(15),
+    model_name		varchar(15),
+    A_ID			varchar(15),
+    op_color		varchar(15),
+    op_engine		varchar(15),
+    op_transmission	varchar(15),
+    get_date		DATE not null,
+    sell_date		DATE,
+    customer_id		varchar(15),
+	primary key (VIN),
+    foreign key (dealer_id) references dealer (dealer_id)
+		on delete set null,
+	foreign key (A_ID) references assembly_plant (A_ID)
+		on delete cascade,
+	foreign key (model_name,op_color,op_engine,op_transmission) references total_price (model_name,op_color,op_engine,op_transmission)
+		on delete cascade,
+	foreign key (customer_id) references customer (customer_id)
+		on delete set null
+	);
+    
+create table consist
+	(VIN			varchar(17),
+    S_ID			varchar(15),
+    component		varchar(15),
+    supply_date		date,
+	primary key (VIN,S_ID,component,supply_date),
+    foreign key (VIN) references vehicle (VIN)
+		on delete cascade,
+    foreign key (S_ID,component,supply_date) references parts (S_ID,component,supply_date)
+		on delete cascade
+	);
+    
+create table supply
+	(A_ID			varchar(15),
+    S_ID			varchar(15),
+    component		varchar(15),
+    supply_date		date,
+	primary key (A_ID,S_ID,component,supply_date),
+    foreign key (A_ID) references assembly_plant (A_ID)
+		on delete cascade,
+    foreign key (S_ID,component,supply_date) references parts (S_ID,component,supply_date)
+		on delete cascade
+	);
+
+insert into brand values ('Volkswagen');
+insert into brand values ('Audi');
+insert into brand values ('Porsche');
+insert into brand values ('Bentley');
+insert into brand values ('Lamborghini');
+insert into brand values ('Skoda');
+insert into brand values ('SEAT');
+insert into brand values ('Bugatti');
+insert into brand values ('Ducati');
+insert into brand values ('Scania');
+insert into brand values ('MAN');
+insert into brand values ('MOIA');
+insert into brand values ('Girl');
+insert into brand values ('bro');
+insert into brand values ('Ju');
+
+insert into model values ('T-Roc','wagon','Volkswagen');
+insert into model values ('Jetta','sedan','Volkswagen');
+insert into model values ('Tiguan','SUV','Volkswagen');
+insert into model values ('A6','sedan','Audi');
+insert into model values ('R8','convertible','Audi');
+insert into model values ('Q8','SUV','Audi');
+insert into model values ('Panamera','convertible','Porsche');
+insert into model values ('Taycan','convertible','Porsche');
+insert into model values ('Cayenne','SUV','Porsche');
+insert into model values ('Flying Spu','sedan','Bentley');
+insert into model values ('Continental GT','convertible','Bentley');
+insert into model values ('Bentayga','SUV','Bentley');
+insert into model values ('Aventador SVJ','convertible','Lamborghini');
+insert into model values ('Aventador S','convertible','Lamborghini');
+insert into model values ('huracan','convertible','Lamborghini');
+
+insert into dealer values ('20170001','Liam');
+insert into dealer values ('20170002','Noah');
+insert into dealer values ('20170003','Oliver');
+insert into dealer values ('20170004','Aaron');
+insert into dealer values ('20170005','William');
+insert into dealer values ('20160001','Elijah');
+insert into dealer values ('20160002','James');
+insert into dealer values ('20160003','Benjamin');
+insert into dealer values ('20160004','Lucas');
+insert into dealer values ('20160005','Mason');
+insert into dealer values ('20150001','Ethan');
+insert into dealer values ('20150002','Mia');
+insert into dealer values ('20150003','Sophia');
+insert into dealer values ('20150004','Isabella');
+insert into dealer values ('20150005','Emma');
+
+insert into customer values ('20191001','Karsyn','01081689254','F','200000000','LA');
+insert into customer values ('20171002','Koa','01092151885','M','150000000','CA');
+insert into customer values ('20171003','Zakai','01098192568','F','120000000','CO');
+insert into customer values ('20171004','Robert','01088793651','M','320000000','LA');
+insert into customer values ('20171005','Sawyer','01015136489','M','520000000','AR');
+insert into customer values ('20161001','James','01058556115','M','1000000000','AR');
+insert into customer values ('20161002','Evan','01012536489','F','250000000','TX');
+insert into customer values ('20161003','Gianni','01056569898','M','150000000','SD');
+insert into customer values ('20161004','Ian','01078954625','M','80000000','OK');
+insert into customer values ('20161105','Jack','01048456321','M','750000000','MO');
+insert into customer values ('20151001','Koda','01095756585','F','650000000','MO');
+insert into customer values ('20151002','Angel','01048583126','F','140000000','WI');
+insert into customer values ('20151003','Connor','01094852624','F','200000000','WI');
+insert into customer values ('20151004','Axel','01012536485','M','2100000000','SC');
+insert into customer values ('20151005','Bode','01049496152','M','300000000','IA');
+
+insert into supply_plant values ('00000001','Robert Bosch GmbH','01098451514','GERMNAY');
+insert into supply_plant values ('00000002','Denso Corp.','01084984848','JAPAN');
+insert into supply_plant values ('00000003','Maqna International Inc.','01084749184','CANADA');
+insert into supply_plant values ('00000004','Continental AG','01066552323','GERMNAY');
+insert into supply_plant values ('00000005','ZF Friedrichshafen AG','01054848989','GERMNAY');
+insert into supply_plant values ('00000006','Aisin Seiki Co.','01098659142','JAPAN');
+insert into supply_plant values ('00000007','Faurecia','01005213058','FRANCE');
+insert into supply_plant values ('00000008','Johnson Controls Inc.','01035258946','USA');
+insert into supply_plant values ('00000009','Lear Corp.','01084712321','USA');
+insert into supply_plant values ('00000010','Valeo SA','01013263205','FRANCE');
+insert into supply_plant values ('00000011','Delphi Automotive','01089456125','USA');
+insert into supply_plant values ('00000012','Yazaki Corp.','01065254899','JAPAN');
+insert into supply_plant values ('00000013','JTEKT Corp.','01048862522','JAPAN');
+insert into supply_plant values ('00000014','Mahle GmbH','01055623332','GERMNAY');
+insert into supply_plant values ('00000015','BASF SE','01069638754','GERMNAY');
+
+insert into assembly_plant values ('10000001','01078781514','CHINA');
+insert into assembly_plant values ('10000002','01015154562','USA');
+insert into assembly_plant values ('10000003','01081615185','USA');
+insert into assembly_plant values ('10000004','01019748515','GERMNAY');
+insert into assembly_plant values ('10000005','01036369587','CHINA');
+insert into assembly_plant values ('10000006','01098481572','CHINA');
+insert into assembly_plant values ('10000007','01014563258','JAPAN');
+insert into assembly_plant values ('10000008','01051784956','USA');
+insert into assembly_plant values ('10000009','01023656985','CHINA');
+insert into assembly_plant values ('10000010','01013184822','FRANCE');
+insert into assembly_plant values ('10000011','01095623251','USA');
+insert into assembly_plant values ('10000012','01069151791','GERMNAY');
+insert into assembly_plant values ('10000013','01098653231','CHINA');
+insert into assembly_plant values ('10000014','01045612051','JAPAN');
+insert into assembly_plant values ('10000015','01098751531','CHINA');
+
+insert into parts values ('transmission','00000001','20170321','Jetta');
+insert into parts values ('transmission','00000001','20170821','Jetta');
+insert into parts values ('transmission','00000001','20180321','Jetta');
+insert into parts values ('transmission','00000001','20180821','Jetta');
+insert into parts values ('transmission','00000002','20180326','A6');
+insert into parts values ('transmission','00000002','20180526','A6');
+insert into parts values ('transmission','00000002','20180826','A6');
+insert into parts values ('Bearing','00000009','20170526','A6');
+insert into parts values ('Bearing','00000009','20180826','A6');
+insert into parts values ('Bearing','00000009','20191026','A6');
+insert into parts values ('transmission','00000003','20170911','Panamera');
+insert into parts values ('transmission','00000003','20180911','Panamera');
+insert into parts values ('Bearing','00000004','20180911','Panamera');
+insert into parts values ('Bearing','00000004','20190321','Panamera');
+insert into parts values ('Bearing','00000004','20180811','Panamera');
+insert into parts values ('transmission','00000004','20170506','R8');
+insert into parts values ('transmission','00000004','20170906','R8');
+insert into parts values ('transmission','00000004','20180306','R8');
+insert into parts values ('Bearing','00000005','20170321','R8');
+insert into parts values ('Bearing','00000005','20180321','R8');
+insert into parts values ('Bearing','00000005','20190321','R8');
+insert into parts values ('transmission','00000006','20170606','Tiguan');
+insert into parts values ('transmission','00000006','20170806','Tiguan');
+insert into parts values ('transmission','00000006','20180306','Tiguan');
+insert into parts values ('Bearing','00000010','20170321','Tiguan');
+insert into parts values ('Bearing','00000010','20180321','Tiguan');
+insert into parts values ('Bearing','00000010','20190321','Tiguan');
+insert into parts values ('transmission','00000007','20170306','Aventador S');
+insert into parts values ('transmission','00000007','20180506','Aventador S');
+insert into parts values ('transmission','00000007','20190306','Aventador S');
+insert into parts values ('Bearing','00000008','20170321','Aventador S');
+insert into parts values ('Bearing','00000008','20180621','Aventador S');
+insert into parts values ('Bearing','00000008','20190921','Aventador S');
+
+insert into total_price values ('Jetta','Red','I4','8-speed TC','30000000');
+insert into total_price values ('Jetta','Blue','I4','8-speed TC','33000000');
+insert into total_price values ('Jetta','Black','I4','8-speed TC','36000000');
+insert into total_price values ('Tiguan','Red','I4','7-speed DCT','43000000');
+insert into total_price values ('Tiguan','Blue','I4','7-speed DCT','46000000');
+insert into total_price values ('Tiguan','Black','I4','7-speed DCT','49000000');
+insert into total_price values ('A6','Red','I4','7-speed AT','65000000');
+insert into total_price values ('A6','Blue','I4','7-speed AT','68000000');
+insert into total_price values ('A6','Black','I4','7-speed AT','71000000');
+insert into total_price values ('Panamera','Red','V6','7-speed DCT','145000000');
+insert into total_price values ('Panamera','Blue','V6','7-speed DCT','148000000');
+insert into total_price values ('Panamera','Black','V6','7-speed DCT','151000000');
+insert into total_price values ('R8','Red','V10','7-speed DCT','250000000');
+insert into total_price values ('R8','Blue','V10','7-speed DCT','253000000');
+insert into total_price values ('R8','Black','V10','7-speed DCT','256000000');
+insert into total_price values ('Aventador S','Red','V12','7-speed AT','572000000');
+insert into total_price values ('Aventador S','Blue','V12','7-speed AT','575000000');
+insert into total_price values ('Aventador S','Black','V12','7-speed AT','578000000');
+
+insert into supply values ('10000001','00000001','transmission','20170321');
+insert into supply values ('10000001','00000001','transmission','20170821');
+insert into supply values ('10000001','00000001','transmission','20180321');
+insert into supply values ('10000001','00000001','transmission','20180821');
+insert into supply values ('10000002','00000002','transmission','20180326');
+insert into supply values ('10000002','00000002','transmission','20180526');
+insert into supply values ('10000002','00000002','transmission','20180826');
+insert into supply values ('10000002','00000009','Bearing','20170526');
+insert into supply values ('10000002','00000009','Bearing','20180826');
+insert into supply values ('10000002','00000009','Bearing','20191026');
+insert into supply values ('10000003','00000003','transmission','20170911');
+insert into supply values ('10000003','00000003','transmission','20180911');
+insert into supply values ('10000003','00000004','Bearing','20180911');
+insert into supply values ('10000003','00000004','Bearing','20190321');
+insert into supply values ('10000003','00000004','Bearing','20180811');
+insert into supply values ('10000004','00000004','transmission','20170506');
+insert into supply values ('10000004','00000004','transmission','20170906');
+insert into supply values ('10000004','00000004','transmission','20180306');
+insert into supply values ('10000004','00000005','Bearing','20170321');
+insert into supply values ('10000004','00000005','Bearing','20180321');
+insert into supply values ('10000004','00000005','Bearing','20190321');
+insert into supply values ('10000005','00000006','transmission','20170606');
+insert into supply values ('10000005','00000006','transmission','20170806');
+insert into supply values ('10000005','00000006','transmission','20180306');
+insert into supply values ('10000005','00000010','Bearing','20170321');
+insert into supply values ('10000005','00000010','Bearing','20180321');
+insert into supply values ('10000005','00000010','Bearing','20190321');
+insert into supply values ('10000006','00000007','transmission','20170306');
+insert into supply values ('10000006','00000007','transmission','20180506');
+insert into supply values ('10000006','00000007','transmission','20190306');
+insert into supply values ('10000006','00000008','Bearing','20170321');
+insert into supply values ('10000006','00000008','Bearing','20180621');
+insert into supply values ('10000006','00000008','Bearing','20190921');
+
+insert into vehicle values ('1234578912345671','20170002','Jetta','10000001','Red','I4','8-speed TC','20180901','20190215','20191001');
+insert into vehicle values ('1234578912345672','20170002','Jetta','10000001','Blue','I4','8-speed TC','20190901','20201121','20171002');
+insert into vehicle values ('1234578912345673','20170002','Jetta','10000001','Black','I4','8-speed TC','20190901','20200122','20171003');
+insert into vehicle values ('1234578912345674','20170001','Tiguan','10000005','Red','I4','7-speed DCT','20181201','20191101','20171004');
+insert into vehicle values ('1234578912345675','20170005','Tiguan','10000005','Blue','I4','7-speed DCT','20190802','20200506','20171005');
+insert into vehicle values ('1234578912345676','20160001','Tiguan','10000005','Black','I4','7-speed DCT','20191212','20210302','20161001');
+insert into vehicle values ('1234578912345677','20160002','A6','10000002','Red','I4','7-speed AT','20190115','20191121','20161002');
+insert into vehicle values ('1234578912345678','20160002','A6','10000002','Blue','I4','7-speed AT','20190321','20200122','20161003');
+insert into vehicle values ('1234578912345679','20160004','A6','10000002','Black','I4','7-speed AT','20190526','20200623','20161004');
+insert into vehicle values ('1234578912345681','20160005','Panamera','10000003','Red','V6','7-speed DCT','20190524','20191225','20161105');
+insert into vehicle values ('1234578912345682','20150001','Panamera','10000003','Blue','V6','7-speed DCT','20190630','20200808','20151001');
+insert into vehicle values ('1234578912345683','20150001','Panamera','10000003','Black','V6','7-speed DCT','20190822','20210321','20151002');
+insert into vehicle values ('1234578912345684','20150003','R8','10000004','Red','V10','7-speed DCT','20190521','20190811','20151003');
+insert into vehicle values ('1234578912345685','20150004','R8','10000004','Blue','V10','7-speed DCT','20191123','20200811','20151004');
+insert into vehicle values ('1234578912345686','20150005','R8','10000004','Black','V10','7-speed DCT','20200122','20200912','20151005');
+insert into vehicle values ('1234578912345687','20170002','Aventador S','10000006','Red','V12','7-speed AT','20191011',null,null);
+insert into vehicle values ('1234578912345688','20160004','Aventador S','10000006','Blue','V12','7-speed AT','20200501',null,null);
+insert into vehicle values ('1234578912345689','20150001','Aventador S','10000006','Blue','V12','7-speed AT','20180522',null,null);
+insert into vehicle values ('1234578912345691','20170001','Aventador S','10000006','Black','V12','7-speed AT','20201122',null,null);
+insert into vehicle values ('1234578912345692','20170001','Aventador S','10000006','Black','V12','7-speed AT','20210322',null,null);
+
+insert into consist values ('1234578912345671','00000001','transmission','20170321');
+insert into consist values ('1234578912345672','00000001','transmission','20170821');
+insert into consist values ('1234578912345673','00000001','transmission','20180321');
+insert into consist values ('1234578912345674','00000006','transmission','20170606');
+insert into consist values ('1234578912345674','00000010','Bearing','20170321');
+insert into consist values ('1234578912345675','00000006','transmission','20170806');
+insert into consist values ('1234578912345675','00000010','Bearing','20180321');
+insert into consist values ('1234578912345676','00000006','transmission','20180306');
+insert into consist values ('1234578912345676','00000010','Bearing','20190321');
+insert into consist values ('1234578912345677','00000002','transmission','20180326');
+insert into consist values ('1234578912345677','00000009','Bearing','20170526');
+insert into consist values ('1234578912345678','00000002','transmission','20180526');
+insert into consist values ('1234578912345678','00000009','Bearing','20180826');
+insert into consist values ('1234578912345679','00000002','transmission','20180826');
+insert into consist values ('1234578912345679','00000009','Bearing','20191026');
+insert into consist values ('1234578912345681','00000003','transmission','20170911');
+insert into consist values ('1234578912345681','00000004','Bearing','20180911');
+insert into consist values ('1234578912345682','00000003','transmission','20170911');
+insert into consist values ('1234578912345682','00000004','Bearing','20190321');
+insert into consist values ('1234578912345683','00000003','transmission','20180911');
+insert into consist values ('1234578912345683','00000004','Bearing','20180811');
+insert into consist values ('1234578912345684','00000004','transmission','20170506');
+insert into consist values ('1234578912345684','00000005','Bearing','20170321');
+insert into consist values ('1234578912345685','00000004','transmission','20170906');
+insert into consist values ('1234578912345685','00000005','Bearing','20180321');
+insert into consist values ('1234578912345686','00000004','transmission','20180306');
+insert into consist values ('1234578912345686','00000005','Bearing','20190321');
+insert into consist values ('1234578912345687','00000007','transmission','20170306');
+insert into consist values ('1234578912345687','00000008','Bearing','20170321');
+insert into consist values ('1234578912345688','00000007','transmission','20180506');
+insert into consist values ('1234578912345688','00000008','Bearing','20180621');
+insert into consist values ('1234578912345689','00000007','transmission','20170306');
+insert into consist values ('1234578912345689','00000008','Bearing','20170321');
+insert into consist values ('1234578912345691','00000007','transmission','20190306');
+insert into consist values ('1234578912345691','00000008','Bearing','20190921');
+insert into consist values ('1234578912345692','00000007','transmission','20190306');
+insert into consist values ('1234578912345692','00000008','Bearing','20190921');

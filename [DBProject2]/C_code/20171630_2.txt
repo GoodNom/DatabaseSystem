@@ -1,0 +1,25 @@
+SET SQL_SAFE_UPDATES = 0;
+
+delete from supply;
+delete from consist;
+delete from vehicle;
+delete from total_price;
+delete from parts;
+delete from assembly_plant;
+delete from supply_plant;
+delete from customer;
+delete from dealer;
+delete from model;
+delete from brand;
+
+drop table if exists supply;
+drop table if exists consist;
+drop table if exists vehicle;
+drop table if exists total_price;
+drop table if exists parts;
+drop table if exists assembly_plant;
+drop table if exists supply_plant;
+drop table if exists customer;
+drop table if exists dealer;
+drop table if exists model;
+drop table if exists brand;
